@@ -7,6 +7,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from typing import List 
 from langchain_core.documents import Document 
 import os 
+from pydantic_models import ModelName
 from chroma_utils import vectorstore
 
 from dotenv import load_dotenv
@@ -43,9 +44,8 @@ qa_prompt = ChatPromptTemplate.from_messages([
 
 
 # Creating the RAG Chain 
-def get_rag_chain(model="gpt-4o-mini"):
-    # llm = ChatOpenAI(model=model)
-    model = 'gemini-2.0-flash-001'
+def get_rag_chain(model=ModelName.GEMINI_FLASH): 
+    # model = 'gemini-2.0-flash'
     llm = ChatGoogleGenerativeAI(api_key=os.getenv("GOOGLE_API_KEY"),model=model)
     history_aware_retriever = create_history_aware_retriever(llm, retriever, contextualize_q_prompt)
     question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)

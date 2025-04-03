@@ -3,7 +3,7 @@ from api_utils import upload_document, list_documents, delete_document
 
 def display_sidebar():
     # Model selection 
-    model_options = ['gpt-4o', 'gpt-4o-mini']
+    model_options = ['gemini-2.0-flash', 'gemini-2.5-pro-exp-03-25']
     st.sidebar.selectbox('Select Model', options=model_options, key='model')
 
     # Document upload 
