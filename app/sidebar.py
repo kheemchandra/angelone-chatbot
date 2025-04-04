@@ -1,7 +1,13 @@
 import streamlit as st 
 from api_utils import upload_document, list_documents, delete_document
 import requests
-import json
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+BACKEND_API_URL = os.getenv("BACKEND_API_URL", "http://localhost:8000")
+
 
 def display_sidebar():
     # Model selection 
@@ -51,7 +57,7 @@ def display_sidebar():
         try:
             with st.sidebar.status("Scraping FAQs from Angel One support..."):
                 response = requests.post(
-                    "http://localhost:8000/scrape-faqs",  # Adjust if your API runs on a different URL
+                    f"{BACKEND_API_URL}/scrape-faqs",
                     json={"base_url": "https://www.angelone.in/support/"}
                 )
                 
