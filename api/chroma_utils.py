@@ -1,4 +1,4 @@
-from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, UnstructuredHTMLLoader
+from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, UnstructuredHTMLLoader, JSONLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 # from langchain_openai import OpenAIEmbeddings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -7,6 +7,7 @@ from typing import List
 from langchain_core.documents import Document 
 import os 
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -14,7 +15,8 @@ load_dotenv()
 # Initialize text splitter and embedding function 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200, length_function=len)
 # embedding_function = OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY"))
-embedding_function = GoogleGenerativeAIEmbeddings(api_key=os.getenv("GOOGLE_API_KEY"), model='models/gemini-embedding-exp-03-07')
+# embedding_function = GoogleGenerativeAIEmbeddings(api_key=os.getenv("GOOGLE_API_KEY"), model='models/gemini-embedding-exp-03-07')
+embedding_function = GoogleGenerativeAIEmbeddings(api_key=os.getenv("GOOGLE_API_KEY"), model='models/text-embedding-004')
 
 
 # Initialize Chroma vector store 
@@ -30,6 +32,12 @@ def load_and_split_document(file_path: str) -> List[Document]:
         loader = Docx2txtLoader(file_path)
     elif file_path.endswith('.html'):
         loader = UnstructuredHTMLLoader(file_path)
+    elif file_path.endswith('.json'):
+        # Use TextLoader instead of JSONLoader for better encoding handling
+        loader = TextLoader(file_path, encoding='utf-8')
+    elif file_path.endswith('.txt'):
+        # Simple text loader with explicit UTF-8 encoding
+        loader = TextLoader(file_path, encoding='utf-8')
     else:
         raise ValueError(f"Unsupported file type: {file_path}")
     

@@ -26,4 +26,7 @@ class DocumentInfo(BaseModel):
     upload_timestamp: datetime 
 
 class DeleteFileRequest(BaseModel):
-    file_id: int 
+    file_id: int
+
+class ScrapeRequest(BaseModel):
+    base_url: str = 'https://www.angelone.in/support/'

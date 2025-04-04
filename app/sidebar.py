@@ -1,5 +1,7 @@
 import streamlit as st 
 from api_utils import upload_document, list_documents, delete_document
+import requests
+import json
 
 def display_sidebar():
     # Model selection 
@@ -32,3 +34,49 @@ def display_sidebar():
             if delete_response:
                 st.sidebar.success(f"Document deleted successfully.")
                 st.session_state.documents = list_documents()
+
+    # Add Web Scraping Section
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("Knowledge Base Management")
+    
+    # Initialize session state for scraping status
+    if "scraping_done" not in st.session_state:
+        st.session_state.scraping_done = False
+    if "scraping_in_progress" not in st.session_state:
+        st.session_state.scraping_in_progress = False
+    
+    # Function to call the scraping API
+    def start_scraping():
+        st.session_state.scraping_in_progress = True
+        try:
+            with st.sidebar.status("Scraping FAQs from Angel One support..."):
+                response = requests.post(
+                    "http://localhost:8000/scrape-faqs",  # Adjust if your API runs on a different URL
+                    json={"base_url": "https://www.angelone.in/support/"}
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    st.session_state.scraping_done = True
+                    st.sidebar.success(f"✅ {result['message']}")
+                    # Store the file IDs of scraped documents
+                    st.session_state.scraped_file_ids = result.get('file_ids', [])
+                else:
+                    st.sidebar.error(f"❌ Error: {response.text}")
+        except Exception as e:
+            st.sidebar.error(f"❌ Error: {str(e)}")
+        finally:
+            st.session_state.scraping_in_progress = False
+    
+    # Show different UI based on scraping status
+    if st.session_state.scraping_done:
+        st.sidebar.success("✅ FAQ data has been scraped and indexed")
+        if st.sidebar.button("Scrape Again"):
+            start_scraping()
+    else:
+        scrape_button = st.sidebar.button(
+            "Scrape Angel One FAQs",
+            disabled=st.session_state.scraping_in_progress
+        )
+        if scrape_button:
+            start_scraping()
